@@ -1,6 +1,6 @@
 <div align="center">
 
-![LLM Hardware & Edge Agent Benchmark](assets/hero_banner.svg)
+![LLM Hardware Performance Benchmark](assets/hero_banner.svg)
 
 <br/>
 
@@ -8,11 +8,10 @@
 [![Ollama](https://img.shields.io/badge/Ollama-0.40%2B-000000?style=for-the-badge&logo=ollama&logoColor=white)](https://ollama.com)
 [![CUDA](https://img.shields.io/badge/CUDA-13.2-76B900?style=for-the-badge&logo=nvidia&logoColor=white)](results/gtx_1650_i5_11300h/summary.md)
 [![Vulkan](https://img.shields.io/badge/Vulkan-Intel%20Iris%20Xe-AC162C?style=for-the-badge&logo=vulkan&logoColor=white)](results/intel_iris_xe_vulkan/summary.md)
-[![Qdrant](https://img.shields.io/badge/Qdrant-Vector%20DB-DC244C?style=for-the-badge&logo=docker&logoColor=white)](lora-agent-pipeline/docker-compose.yml)
 
-**A reproducible, multi-system benchmark suite evaluating local LLM throughput across discrete GPUs, CPU system memory, integrated GPUs, and distributed LoRa-to-LLM agent pipelines.**
+**A reproducible, multi-system benchmark suite evaluating local LLM throughput across discrete GPUs, CPU system memory, and integrated GPUs.**
 
-[Leaderboard](#-cross-system--memory-tier-leaderboard) · [Architecture](#-memory-topology--architecture) · [LoRa Agent Pipeline](#-lora-to-local-llm-agent-pipeline) · [Replicate](#-how-to-replicate-on-any-machine) · [Full Blog Post](BLOG_POST.md)
+[Leaderboard](#-cross-system--memory-tier-leaderboard) · [Memory Topology](#-memory-topology--architecture) · [How to Replicate](#-how-to-replicate-on-any-machine) · [Full Blog Post](BLOG_POST.md)
 
 </div>
 
@@ -68,50 +67,6 @@ flowchart LR
 
 ---
 
-## 📡 LoRa-to-Local-LLM Agent Pipeline & Heltec V3 Firmware
-
-Beyond standalone token generation, [`lora-agent-pipeline/`](lora-agent-pipeline/) and [`firmware/heltec_v3_sx1262/`](firmware/heltec_v3_sx1262/) implement a complete cyber-physical feedback loop: on-device INT8 edge anomaly scoring on **Heltec WiFi LoRa 32 V3 (ESP32-S3 + SX1262)** boards feeding a Dockerized **Qdrant** vector database and **MCP tool-calling** local LLM agent.
-
-![Heltec WiFi LoRa 32 V3 Edge-to-LLM Architecture](assets/heltec_edge_to_llm.svg)
-
-![LoRa-to-Local-LLM Sensor-to-Agent Latency Waterfall](assets/lora_latency_waterfall.svg)
-
-```mermaid
-flowchart LR
-    A["LoRa Nodes<br/>(SX1262 SF7 • 61.7 ms)"] --> B["Ollama Embed<br/>(nomic-embed-text • 527.1 ms)"]
-    B --> C["Docker Qdrant<br/>(Vector Search • 1.78 ms)"]
-    C --> D["LLM MCP Agent<br/>(llama3.2:1b • 1,012.0 ms)"]
-    D --> E["Tool Actuation<br/>(Total E2E: 1,602.6 ms)"]
-```
-
-<details>
-<summary><b>▶ View Full Pipeline Telemetry & Run Instructions</b></summary>
-
-- **Burst Profile:** 20 simulated LoRa nodes (SX1262, SF7, 24-byte payload), 7 critical bearing anomalies triaged
-- **LoRa Time-on-Air:** `61.70 ms`
-- **Ollama Embedding (`nomic-embed-text`):** `527.12 ms`
-- **Qdrant Vector Upsert / Search:** `30.26 ms` / `1.78 ms`
-- **LLM MCP Reasoning (`llama3.2:1b`):** `1,012.04 ms`
-- **Total End-to-End Anomaly Triage:** **`1,602.64 ms`** (~1.60 s)
-- **Host GPU Power & Thermal Profile:** `21.47 W` avg | `393.81 J` total | Peak `48 °C`
-
-```bash
-cd lora-agent-pipeline
-docker compose up -d
-
-# Mode A: Stress-test with simulated 20-node SX1262 burst
-python3 agent_bridge.py --nodes 20 --sf 7 --llm-model llama3.2:1b --delete-after
-
-# Mode B: Ingest live RF packets from a Heltec WiFi LoRa 32 V3 USB gateway
-python3 agent_bridge.py --serial-port /dev/ttyUSB0 --nodes 20 --llm-model llama3.2:1b
-
-docker compose down -v
-```
-
-</details>
-
----
-
 ## 🚀 How to Replicate on Any Machine
 
 Clone this repository on any Linux, macOS, or Windows (WSL) workstation running Ollama. The `--delete-after` flag automatically pulls missing test models, executes the benchmark, updates the leaderboard, and deletes the weights from disk afterward.
@@ -142,9 +97,7 @@ python3 generate_charts.py
 
 ### Directory Layout
 ```text
-├── assets/                     # Auto-generated SVG banners, charts & Heltec architecture
-├── firmware/heltec_v3_sx1262/  # PlatformIO C++ firmware for Heltec WiFi LoRa 32 V3 (ESP32-S3 + SX1262)
-├── lora-agent-pipeline/        # Docker Qdrant + LoRa SX1262/USB bridge + MCP Agent stress test
+├── assets/                     # Auto-generated SVG banners & charts
 ├── results/                    # Per-system JSON logs & cross-hardware LEADERBOARD.md
 ├── benchmark.py                # Zero-dependency multi-system benchmark & runner eviction tool
 ├── generate_charts.py          # Zero-dependency SVG chart generator
@@ -156,7 +109,6 @@ python3 generate_charts.py
 ### Run Unit Tests
 ```bash
 python3 -m unittest test_benchmark.py
-python3 -m unittest discover -s lora-agent-pipeline -p "test_*.py"
 ```
 
 </details>
