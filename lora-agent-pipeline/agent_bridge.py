@@ -15,11 +15,56 @@ import urllib.request
 from typing import Any, Dict, List
 
 from energy_profiler import EnergyMonitor
-from lora_simulator import generate_fleet_burst
+from lora_simulator import calculate_lora_toa_ms, generate_fleet_burst
 
 
 COLLECTION_NAME = "lora_telemetry"
 EMBED_MODEL = "nomic-embed-text:latest"
+
+
+def parse_gateway_json_line(raw_line: str) -> Dict[str, Any]:
+    """
+    Parse newline-delimited JSON emitted by Heltec WiFi LoRa 32 V3 USB-C Gateway
+    and normalize into the pipeline telemetry schema.
+    """
+    raw = json.loads(raw_line.strip())
+    node_id = str(raw.get("node_id", "heltec-v3-unknown"))
+    sf = int(raw.get("sf", 7))
+    temp_c = float(raw.get("temp_c", 0.0))
+    vib = float(raw.get("vibration_rms", 0.0))
+    acoustic = float(raw.get("acoustic_db", 0.0))
+    rssi = float(raw.get("rssi", -80.0))
+    snr = float(raw.get("snr", 5.0))
+    vbat = int(raw.get("battery_mv", 3800))
+    anomaly = bool(raw.get("anomaly", False))
+    status = "CRITICAL_BEARING_ANOMALY" if anomaly else "NOMINAL"
+
+    raw["toa_ms"] = raw.get("toa_ms") or calculate_lora_toa_ms(len(raw_line), sf=sf)
+    raw["telemetry_text"] = raw.get("telemetry_text") or (
+        f"Node {node_id} status={status} temp={temp_c}C "
+        f"vibration={vib}g acoustic={acoustic}dB "
+        f"rssi={rssi}dBm snr={snr}dB battery={vbat}mV"
+    )
+    return raw
+
+
+def read_serial_packets(port: str, baud: int, max_packets: int) -> List[Dict[str, Any]]:
+    """Read newline-delimited JSON packets from a Linux USB serial device without external deps."""
+    import subprocess as sp
+
+    sp.check_call(["stty", "-F", port, str(baud), "raw", "-echo"])
+    packets: List[Dict[str, Any]] = []
+    print(f"[*] Listening for {max_packets} live Heltec packets on {port} @ {baud} baud...")
+    with open(port, "r", encoding="utf-8", errors="replace") as ser:
+        while len(packets) < max_packets:
+            line = ser.readline()
+            if not line or not line.strip().startswith("{"):
+                continue
+            try:
+                packets.append(parse_gateway_json_line(line))
+            except Exception as exc:
+                print(f"[!] Skipping malformed serial frame: {exc}")
+    return packets
 
 
 def http_json(url: str, method: str = "GET", payload: Any = None, timeout: int = 120) -> Dict[str, Any]:
@@ -109,6 +154,8 @@ def run_stress_test(
     num_nodes: int,
     sf: int,
     delete_after: bool,
+    serial_port: str = "",
+    baud: int = 115200,
 ) -> Dict[str, Any]:
     """Execute full LoRa-to-Local-LLM Agent Pipeline benchmark."""
     # Ensure LLM is available if needed
@@ -128,8 +175,11 @@ def run_stress_test(
     sample_vec = get_embedding(ollama_url, "init")
     ensure_qdrant_collection(qdrant_url, vector_size=len(sample_vec))
 
-    print(f"[*] Generating burst of {num_nodes} LoRa packets (SX1262, SF{sf})...")
-    packets = generate_fleet_burst(num_nodes=num_nodes, anomaly_ratio=0.25, sf=sf)
+    if serial_port:
+        packets = read_serial_packets(serial_port, baud, max_packets=num_nodes)
+    else:
+        print(f"[*] Generating burst of {num_nodes} LoRa packets (SX1262, SF{sf})...")
+        packets = generate_fleet_burst(num_nodes=num_nodes, anomaly_ratio=0.25, sf=sf)
 
     monitor = EnergyMonitor()
     monitor.start()
@@ -218,8 +268,10 @@ def main():
     parser.add_argument("--ollama-url", default="http://localhost:11434")
     parser.add_argument("--qdrant-url", default="http://localhost:6333")
     parser.add_argument("--llm-model", default="llama3.2:1b")
-    parser.add_argument("--nodes", type=int, default=20, help="Number of simulated LoRa nodes")
+    parser.add_argument("--nodes", type=int, default=20, help="Number of simulated LoRa nodes or live packets")
     parser.add_argument("--sf", type=int, default=7, help="LoRa Spreading Factor (7-12)")
+    parser.add_argument("--serial-port", default="", help="Optional USB serial device (e.g. /dev/ttyUSB0) for live Heltec V3 gateway")
+    parser.add_argument("--baud", type=int, default=115200, help="USB serial baud rate (default: 115200)")
     parser.add_argument("--delete-after", action="store_true", help="Remove pulled LLM weights after test")
     parser.add_argument("--output-json", default="../results/lora_agent_stress_test.json")
     args = parser.parse_args()
@@ -231,6 +283,8 @@ def main():
         num_nodes=args.nodes,
         sf=args.sf,
         delete_after=args.delete_after,
+        serial_port=args.serial_port,
+        baud=args.baud,
     )
 
     os.makedirs(os.path.dirname(args.output_json) or ".", exist_ok=True)

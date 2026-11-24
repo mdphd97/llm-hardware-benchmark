@@ -68,9 +68,11 @@ flowchart LR
 
 ---
 
-## 📡 LoRa-to-Local-LLM Agent Pipeline
+## 📡 LoRa-to-Local-LLM Agent Pipeline & Heltec V3 Firmware
 
-Beyond standalone token generation, [`lora-agent-pipeline/`](lora-agent-pipeline/) stress-tests a distributed cyber-physical loop: simulated **Semtech SX1262 LoRa nodes** transmit sensor telemetry to a Dockerized **Qdrant** vector database, generate embeddings via `nomic-embed-text`, and trigger an **MCP tool-calling** reasoning loop.
+Beyond standalone token generation, [`lora-agent-pipeline/`](lora-agent-pipeline/) and [`firmware/heltec_v3_sx1262/`](firmware/heltec_v3_sx1262/) implement a complete cyber-physical feedback loop: on-device INT8 edge anomaly scoring on **Heltec WiFi LoRa 32 V3 (ESP32-S3 + SX1262)** boards feeding a Dockerized **Qdrant** vector database and **MCP tool-calling** local LLM agent.
+
+![Heltec WiFi LoRa 32 V3 Edge-to-LLM Architecture](assets/heltec_edge_to_llm.svg)
 
 ![LoRa-to-Local-LLM Sensor-to-Agent Latency Waterfall](assets/lora_latency_waterfall.svg)
 
@@ -96,7 +98,13 @@ flowchart LR
 ```bash
 cd lora-agent-pipeline
 docker compose up -d
+
+# Mode A: Stress-test with simulated 20-node SX1262 burst
 python3 agent_bridge.py --nodes 20 --sf 7 --llm-model llama3.2:1b --delete-after
+
+# Mode B: Ingest live RF packets from a Heltec WiFi LoRa 32 V3 USB gateway
+python3 agent_bridge.py --serial-port /dev/ttyUSB0 --nodes 20 --llm-model llama3.2:1b
+
 docker compose down -v
 ```
 
@@ -134,8 +142,9 @@ python3 generate_charts.py
 
 ### Directory Layout
 ```text
-├── assets/                     # Auto-generated SVG banners & charts
-├── lora-agent-pipeline/        # Docker Qdrant + LoRa SX1262 + MCP Agent stress test
+├── assets/                     # Auto-generated SVG banners, charts & Heltec architecture
+├── firmware/heltec_v3_sx1262/  # PlatformIO C++ firmware for Heltec WiFi LoRa 32 V3 (ESP32-S3 + SX1262)
+├── lora-agent-pipeline/        # Docker Qdrant + LoRa SX1262/USB bridge + MCP Agent stress test
 ├── results/                    # Per-system JSON logs & cross-hardware LEADERBOARD.md
 ├── benchmark.py                # Zero-dependency multi-system benchmark & runner eviction tool
 ├── generate_charts.py          # Zero-dependency SVG chart generator

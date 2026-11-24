@@ -1,0 +1,61 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1100 320" width="100%" height="320">
+  <rect width="1100" height="320" rx="14" fill="#0f172a" stroke="#1e293b" stroke-width="1.5" />
+  <text x="40" y="42" fill="#f8fafc" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="21" font-weight="700">Heltec WiFi LoRa 32 V3: Edge TinyML to Local LLM Agent Architecture</text>
+  <text x="40" y="66" fill="#94a3b8" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="13.5">Ready-to-flash PlatformIO dual-role firmware paired with Linux Docker Qdrant &amp; Ollama MCP</text>
+
+  <!-- Node 1: Heltec Edge -->
+  <rect x="40" y="96" width="230" height="156" rx="10" fill="#1e293b" stroke="#38bdf8" stroke-width="1.5" />
+  <text x="155" y="122" text-anchor="middle" fill="#38bdf8" font-family="ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace" font-size="13.5" font-weight="700">Heltec V3 Edge Node</text>
+  <text x="155" y="146" text-anchor="middle" fill="#e2e8f0" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="12">ESP32-S3FN8 + SSD1306</text>
+  <text x="155" y="170" text-anchor="middle" fill="#94a3b8" font-family="ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace" font-size="11.5">• INT8 TinyML Scoring</text>
+  <text x="155" y="190" text-anchor="middle" fill="#94a3b8" font-family="ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace" font-size="11.5">• SX1262 LoRa 915MHz SF7</text>
+  <text x="155" y="210" text-anchor="middle" fill="#94a3b8" font-family="ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace" font-size="11.5">• Vext Cut + Deep Sleep</text>
+  <text x="155" y="234" text-anchor="middle" fill="#7dd3fc" font-family="ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace" font-size="11">GPIO 8/12/13/14 • ~61.7ms ToA</text>
+
+  <!-- Arrow 1->2 -->
+  <line x1="270" y1="174" x2="320" y2="174" stroke="#38bdf8" stroke-width="2" stroke-dasharray="5 3" />
+  <polygon points="320,169 330,174 320,179" fill="#38bdf8" />
+  <text x="300" y="162" text-anchor="middle" fill="#7dd3fc" font-family="ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace" font-size="10.5">RF</text>
+
+  <!-- Node 2: Heltec Gateway -->
+  <rect x="330" y="96" width="210" height="156" rx="10" fill="#1e293b" stroke="#818cf8" stroke-width="1.5" />
+  <text x="435" y="122" text-anchor="middle" fill="#a5b4fc" font-family="ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace" font-size="13.5" font-weight="700">Heltec V3 Gateway</text>
+  <text x="435" y="146" text-anchor="middle" fill="#e2e8f0" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="12">SX1262 RX + USB-C UART</text>
+  <text x="435" y="170" text-anchor="middle" fill="#94a3b8" font-family="ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace" font-size="11.5">• Appends RSSI &amp; SNR</text>
+  <text x="435" y="190" text-anchor="middle" fill="#94a3b8" font-family="ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace" font-size="11.5">• OLED Live Telemetry</text>
+  <text x="435" y="210" text-anchor="middle" fill="#94a3b8" font-family="ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace" font-size="11.5">• 115200 Baud JSON Stream</text>
+  <text x="435" y="234" text-anchor="middle" fill="#c7d2fe" font-family="ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace" font-size="11">--serial-port /dev/ttyUSB0</text>
+
+  <!-- Arrow 2->3 -->
+  <line x1="540" y1="174" x2="590" y2="174" stroke="#818cf8" stroke-width="2" />
+  <polygon points="590,169 600,174 590,179" fill="#818cf8" />
+  <text x="570" y="162" text-anchor="middle" fill="#c7d2fe" font-family="ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace" font-size="10.5">USB</text>
+
+  <!-- Node 3: Docker Qdrant + Embed -->
+  <rect x="600" y="96" width="220" height="156" rx="10" fill="#1e293b" stroke="#34d399" stroke-width="1.5" />
+  <text x="710" y="122" text-anchor="middle" fill="#34d399" font-family="ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace" font-size="13.5" font-weight="700">Docker Vector Memory</text>
+  <text x="710" y="146" text-anchor="middle" fill="#e2e8f0" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="12">Qdrant + nomic-embed</text>
+  <text x="710" y="170" text-anchor="middle" fill="#94a3b8" font-family="ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace" font-size="11.5">• 768-dim Embeddings</text>
+  <text x="710" y="190" text-anchor="middle" fill="#94a3b8" font-family="ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace" font-size="11.5">• Cosine Context Lookup</text>
+  <text x="710" y="210" text-anchor="middle" fill="#94a3b8" font-family="ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace" font-size="11.5">• 1.78 ms Vector Search</text>
+  <text x="710" y="234" text-anchor="middle" fill="#6ee7b7" font-family="ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace" font-size="11">Port 6333 • Local Linux</text>
+
+  <!-- Arrow 3->4 -->
+  <line x1="820" y1="174" x2="860" y2="174" stroke="#f59e0b" stroke-width="2" />
+  <polygon points="860,169 870,174 860,179" fill="#f59e0b" />
+
+  <!-- Node 4: Local LLM MCP -->
+  <rect x="870" y="96" width="190" height="156" rx="10" fill="#1e293b" stroke="#f59e0b" stroke-width="1.5" />
+  <text x="965" y="122" text-anchor="middle" fill="#fbbf24" font-family="ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace" font-size="13.5" font-weight="700">Local LLM Agent</text>
+  <text x="965" y="146" text-anchor="middle" fill="#e2e8f0" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="12">Ollama + MCP Dispatch</text>
+  <text x="965" y="170" text-anchor="middle" fill="#94a3b8" font-family="ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace" font-size="11.5">• Anomaly Triage</text>
+  <text x="965" y="190" text-anchor="middle" fill="#94a3b8" font-family="ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace" font-size="11.5">• JSON Tool Selection</text>
+  <text x="965" y="210" text-anchor="middle" fill="#94a3b8" font-family="ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace" font-size="11.5">• 1,012 ms Inference</text>
+  <text x="965" y="234" text-anchor="middle" fill="#fde68a" font-family="ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace" font-size="11">1.60 s Total E2E Loop</text>
+
+  <!-- Footer -->
+  <rect x="40" y="272" width="1020" height="30" rx="6" fill="#1e293b" />
+  <text x="550" y="292" text-anchor="middle" fill="#cbd5e1" font-family="ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace" font-size="12.5">
+    firmware/heltec_v3_sx1262/  --&gt;  lora-agent-pipeline/agent_bridge.py  --&gt;  Verified Hardware &amp; Latency Telemetry
+  </text>
+</svg>

@@ -6,6 +6,7 @@ Unit tests for LoRa-to-Local-LLM Agent Pipeline.
 import unittest
 from lora_simulator import calculate_lora_toa_ms, generate_sensor_packet
 from energy_profiler import parse_nvidia_smi_power
+from agent_bridge import parse_gateway_json_line
 
 
 class TestLoraPipeline(unittest.TestCase):
@@ -35,6 +36,18 @@ class TestLoraPipeline(unittest.TestCase):
         self.assertAlmostEqual(parsed["power_watts"], 18.45)
         self.assertEqual(parsed["temp_c"], 52)
         self.assertEqual(parsed["vram_used_mb"], 420)
+
+    def test_parse_heltec_gateway_json_line(self):
+        raw_line = (
+            '{"node_id":"heltec-v3-01","sf":7,"temp_c":78.4,"vibration_rms":3.45,'
+            '"acoustic_db":91.2,"battery_mv":3980,"tinyml_us":14,"score":0.91,'
+            '"free_heap":294812,"anomaly":true,"rssi":-74.0,"snr":9.5}'
+        )
+        pkt = parse_gateway_json_line(raw_line)
+        self.assertEqual(pkt["node_id"], "heltec-v3-01")
+        self.assertTrue(pkt["anomaly"])
+        self.assertIn("CRITICAL_BEARING_ANOMALY", pkt["telemetry_text"])
+        self.assertGreater(pkt["toa_ms"], 40.0)
 
 
 if __name__ == "__main__":
