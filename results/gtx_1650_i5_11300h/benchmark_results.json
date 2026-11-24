@@ -1,5 +1,6 @@
 {
   "system_profile": {
+    "system_id": "gtx_1650_i5_11300h",
     "os": "Linux-7.0.0-43-generic-x86_64-with-glibc2.43",
     "cpu": "11th Gen Intel(R) Core(TM) i5-11300H @ 3.10GHz",
     "ram": "22.8 GiB",
@@ -7,43 +8,60 @@
     "gpu_vram": "4.0 GiB (4096 MiB)",
     "gpu_driver": "595.99.02",
     "cuda_version": "13.2",
-    "timestamp": "2026-11-24T18:17:30.714286+00:00",
-    "system_id": "gtx_1650_i5_11300h"
+    "num_gpu_layers": "auto",
+    "timestamp": "2026-11-24T18:40:19.781123+00:00"
   },
   "benchmark_results": [
     {
       "model": "llama3.2:1b",
-      "runs": 3,
+      "execution_mode": "Full VRAM Offload",
+      "num_gpu": "auto",
+      "runs": 2,
       "tokens_generated": 128,
       "prompt_speeds": [
-        752.57,
-        5456.45,
-        5318.06
+        827.41,
+        5414.97
       ],
       "eval_speeds": [
-        105.99,
-        106.46,
-        106.06
+        105.64,
+        104.42
       ],
-      "avg_prompt_speed_tok_s": 3842.36,
-      "avg_eval_speed_tok_s": 106.17
+      "avg_prompt_speed_tok_s": 3121.19,
+      "avg_eval_speed_tok_s": 105.03
     },
     {
       "model": "llama3.2:3b",
-      "runs": 3,
+      "execution_mode": "Full VRAM Offload",
+      "num_gpu": "auto",
+      "runs": 2,
       "tokens_generated": 128,
       "prompt_speeds": [
-        307.17,
-        3211.66,
-        3236.85
+        306.57,
+        3220.21
       ],
       "eval_speeds": [
-        63.12,
-        62.94,
-        62.91
+        63.1,
+        63.16
       ],
-      "avg_prompt_speed_tok_s": 2251.89,
-      "avg_eval_speed_tok_s": 62.99
+      "avg_prompt_speed_tok_s": 1763.39,
+      "avg_eval_speed_tok_s": 63.13
+    },
+    {
+      "model": "llama3.1:8b",
+      "execution_mode": "Hybrid Offload (VRAM + System RAM)",
+      "num_gpu": "auto",
+      "runs": 2,
+      "tokens_generated": 128,
+      "prompt_speeds": [
+        31.61,
+        307.28
+      ],
+      "eval_speeds": [
+        8.28,
+        8.08
+      ],
+      "avg_prompt_speed_tok_s": 169.44,
+      "avg_eval_speed_tok_s": 8.18
     }
   ]
 }

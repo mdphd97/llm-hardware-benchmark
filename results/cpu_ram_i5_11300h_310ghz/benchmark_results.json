@@ -1,0 +1,67 @@
+{
+  "system_profile": {
+    "system_id": "cpu_ram_i5_11300h_310ghz",
+    "os": "Linux-7.0.0-43-generic-x86_64-with-glibc2.43",
+    "cpu": "11th Gen Intel(R) Core(TM) i5-11300H @ 3.10GHz",
+    "ram": "22.8 GiB",
+    "gpu_model": "NVIDIA GeForce GTX 1650",
+    "gpu_vram": "4.0 GiB (4096 MiB)",
+    "gpu_driver": "595.99.02",
+    "cuda_version": "13.2",
+    "num_gpu_layers": 0,
+    "timestamp": "2026-11-24T18:35:24.597244+00:00"
+  },
+  "benchmark_results": [
+    {
+      "model": "llama3.2:1b",
+      "execution_mode": "CPU + System RAM (0 GPU layers)",
+      "num_gpu": 0,
+      "runs": 2,
+      "tokens_generated": 128,
+      "prompt_speeds": [
+        294.27,
+        1108.79
+      ],
+      "eval_speeds": [
+        21.63,
+        21.97
+      ],
+      "avg_prompt_speed_tok_s": 701.53,
+      "avg_eval_speed_tok_s": 21.8
+    },
+    {
+      "model": "llama3.2:3b",
+      "execution_mode": "CPU + System RAM (0 GPU layers)",
+      "num_gpu": 0,
+      "runs": 2,
+      "tokens_generated": 128,
+      "prompt_speeds": [
+        171.73,
+        806.1
+      ],
+      "eval_speeds": [
+        17.05,
+        16.98
+      ],
+      "avg_prompt_speed_tok_s": 488.92,
+      "avg_eval_speed_tok_s": 17.02
+    },
+    {
+      "model": "llama3.1:8b",
+      "execution_mode": "CPU + System RAM (0 GPU layers)",
+      "num_gpu": 0,
+      "runs": 2,
+      "tokens_generated": 128,
+      "prompt_speeds": [
+        49.92,
+        223.45
+      ],
+      "eval_speeds": [
+        6.35,
+        6.24
+      ],
+      "avg_prompt_speed_tok_s": 136.69,
+      "avg_eval_speed_tok_s": 6.29
+    }
+  ]
+}

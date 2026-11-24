@@ -1,0 +1,67 @@
+{
+  "system_profile": {
+    "system_id": "intel_iris_xe_vulkan",
+    "os": "Linux-7.0.0-43-generic-x86_64-with-glibc2.43",
+    "cpu": "11th Gen Intel(R) Core(TM) i5-11300H @ 3.10GHz",
+    "ram": "22.8 GiB",
+    "gpu_model": "NVIDIA GeForce GTX 1650",
+    "gpu_vram": "4.0 GiB (4096 MiB)",
+    "gpu_driver": "595.99.02",
+    "cuda_version": "13.2",
+    "num_gpu_layers": "auto",
+    "timestamp": "2026-11-24T18:42:46.452813+00:00"
+  },
+  "benchmark_results": [
+    {
+      "model": "llama3.2:1b",
+      "execution_mode": "Intel Iris Xe (Vulkan iGPU)",
+      "num_gpu": "auto",
+      "runs": 2,
+      "tokens_generated": 128,
+      "prompt_speeds": [
+        244.85,
+        360.98
+      ],
+      "eval_speeds": [
+        7.03,
+        6.88
+      ],
+      "avg_prompt_speed_tok_s": 302.92,
+      "avg_eval_speed_tok_s": 6.96
+    },
+    {
+      "model": "llama3.2:3b",
+      "execution_mode": "Intel Iris Xe (Vulkan iGPU)",
+      "num_gpu": "auto",
+      "runs": 2,
+      "tokens_generated": 128,
+      "prompt_speeds": [
+        136.68,
+        262.28
+      ],
+      "eval_speeds": [
+        5.22,
+        5.06
+      ],
+      "avg_prompt_speed_tok_s": 199.48,
+      "avg_eval_speed_tok_s": 5.14
+    },
+    {
+      "model": "llama3.1:8b",
+      "execution_mode": "Intel Iris Xe (Vulkan iGPU)",
+      "num_gpu": "auto",
+      "runs": 2,
+      "tokens_generated": 128,
+      "prompt_speeds": [
+        41.41,
+        115.15
+      ],
+      "eval_speeds": [
+        3.41,
+        3.28
+      ],
+      "avg_prompt_speed_tok_s": 78.28,
+      "avg_eval_speed_tok_s": 3.34
+    }
+  ]
+}

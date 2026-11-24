@@ -1,20 +1,14 @@
-## System Hardware Profile
+### System: `gtx_1650_i5_11300h`
 
 - **Processor (CPU):** 11th Gen Intel(R) Core(TM) i5-11300H @ 3.10GHz
 - **System Memory (RAM):** 22.8 GiB
-- **Dedicated Graphics (GPU):** NVIDIA GeForce GTX 1650
-- **Video Memory (VRAM):** 4.0 GiB (4096 MiB)
-- **GPU Driver & CUDA:** Driver 595.99.02 | CUDA 13.2
-- **Operating System:** Linux-7.0.0-43-generic-x86_64-with-glibc2.43
-- **Benchmark Date:** 2026-11-24T18:17:30.714286+00:00
+- **Graphics (GPU):** NVIDIA GeForce GTX 1650 (4.0 GiB (4096 MiB))
+- **GPU Layers (`num_gpu`):** auto
+- **OS:** Linux-7.0.0-43-generic-x86_64-with-glibc2.43
+- **Benchmark Date:** 2026-11-24T18:40:19.781123+00:00
 
-## Inference Performance Results
-
-| Model Name | Prompt Processing (tok/s) | Generation Speed (tok/s) | Samples | Evaluation Mode |
+| Model Name | Prompt Processing (tok/s) | Generation Speed (tok/s) | Runs | Execution Mode |
 | :--- | :---: | :---: | :---: | :--- |
-| `llama3.2:1b` | **3842.36** | **106.17** | 3 | Full GPU VRAM Offload |
-| `llama3.2:3b` | **2251.89** | **62.99** | 3 | Full GPU VRAM Offload |
-
-> [!NOTE]
-> Prompt processing measures time-to-first-token throughput (input comprehension).
-> Generation speed measures sustained token output rate during active text synthesis.
+| `llama3.2:1b` | **3121.19** | **105.03** | 2 | Full VRAM Offload |
+| `llama3.2:3b` | **1763.39** | **63.13** | 2 | Full VRAM Offload |
+| `llama3.1:8b` | **169.44** | **8.18** | 2 | Hybrid Offload (VRAM + System RAM) |

@@ -4,14 +4,24 @@ A standardized, multi-system benchmarking framework and leaderboard evaluating l
 
 ---
 
-## Cross-System Leaderboard
+## Cross-System & Memory-Tier Leaderboard
 
-All benchmarks are run using zero-temperature greedy decoding across a fixed 128-token generation window after a warm-up cycle:
+All benchmarks are run using zero-temperature greedy decoding across a fixed 128-token generation window after a warm-up cycle and runner eviction:
 
-| System ID | GPU / Compute | CPU & RAM | Model | Prompt (tok/s) | Generation (tok/s) |
-| :--- | :--- | :--- | :--- | :---: | :---: |
-| `gtx_1650_i5_11300h` | GTX 1650 (4.0 GiB) | Intel i5-11300H (22.8 GiB DDR4) | `llama3.2:1b` | **3,842.36** | **106.17** |
-| `gtx_1650_i5_11300h` | GTX 1650 (4.0 GiB) | Intel i5-11300H (22.8 GiB DDR4) | `llama3.2:3b` | **2,251.89** | **62.99** |
+| System ID | Compute / Memory Tier | Model | Prompt (tok/s) | Generation (tok/s) |
+| :--- | :--- | :--- | :---: | :---: |
+| `gtx_1650_i5_11300h` | Full VRAM Offload (CUDA GTX 1650) | `llama3.2:1b` | **3,121.19** | **105.03** |
+| `cpu_ram_i5_11300h_310ghz` | CPU + System RAM (`--num-gpu 0`) | `llama3.2:1b` | **701.53** | **21.80** |
+| `intel_iris_xe_vulkan` | Intel Iris Xe iGPU (Vulkan Unified RAM) | `llama3.2:1b` | **302.92** | **6.96** |
+| `gtx_1650_i5_11300h` | Full VRAM Offload (CUDA GTX 1650) | `llama3.2:3b` | **1,763.39** | **63.13** |
+| `cpu_ram_i5_11300h_310ghz` | CPU + System RAM (`--num-gpu 0`) | `llama3.2:3b` | **488.92** | **17.02** |
+| `intel_iris_xe_vulkan` | Intel Iris Xe iGPU (Vulkan Unified RAM) | `llama3.2:3b` | **199.48** | **5.14** |
+| `gtx_1650_i5_11300h` | Hybrid Offload (VRAM + System RAM) | `llama3.1:8b` | **169.44** | **8.18** |
+| `cpu_ram_i5_11300h_310ghz` | CPU + System RAM (`--num-gpu 0`) | `llama3.1:8b` | **136.69** | **6.29** |
+| `intel_iris_xe_vulkan` | Intel Iris Xe iGPU (Vulkan Unified RAM) | `llama3.1:8b` | **78.28** | **3.34** |
+
+> [!TIP]
+> **Why CPU Beats the Integrated GPU:** On Intel Tiger Lake (i5-11300H), the CPU cores feature AVX-512 and VNNI vector instructions paired with GGML `CPU_REPACK` kernels. Because both the CPU and the Intel Iris Xe iGPU share the same dual-channel DDR4 memory bus, CPU execution (`21.80 tok/s`) outperforms Vulkan iGPU execution (`6.96 tok/s`) by ~3x—explaining why Ollama disables integrated GPUs by default (`OLLAMA_IGPU_ENABLE=1`).
 
 ---
 
@@ -51,9 +61,13 @@ cd llm-hardware-benchmark
 python3 benchmark.py --models llama3.2:1b llama3.2:3b --delete-after
 ```
 
-### Optional Custom System Identifier
-By default, the script generates a system identifier from your GPU and CPU model. You can specify a custom name:
+### Optional Custom System Identifier & Memory-Tier Modes
+By default, the script generates a system identifier from your GPU and CPU model. You can specify a custom name or force CPU/System-RAM execution:
 ```bash
+# Force pure CPU + System DDR4 RAM execution (0 GPU layers)
+python3 benchmark.py --num-gpu 0 --models llama3.2:1b llama3.2:3b llama3.1:8b --delete-after
+
+# Benchmark with a custom system name and backend label
 python3 benchmark.py --system-name "work-m2-macbook-pro" --models llama3.2:1b llama3.2:3b --delete-after
 ```
 
