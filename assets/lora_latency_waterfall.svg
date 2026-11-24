@@ -1,0 +1,30 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1100 370" width="100%" height="370">
+  <defs><clipPath id="stackClip"><rect x="40" y="95" width="1020" height="24" rx="6" /></clipPath></defs>
+  <rect width="1100" height="370" rx="14" fill="#0f172a" stroke="#1e293b" stroke-width="1.5" />
+  <text x="40" y="44" fill="#f8fafc" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="22" font-weight="700">LoRa-to-Local-LLM Sensor-to-Agent Latency Waterfall</text>
+  <text x="40" y="70" fill="#94a3b8" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="14">End-to-End Physical Anomaly Triage: 20 LoRa Nodes (7 anomalies) • Total E2E: 1602.64 ms</text>
+  <g clip-path="url(#stackClip)">
+    <rect x="40.0" y="95" width="39.3" height="24" fill="#38bdf8" />
+    <rect x="79.3" y="95" width="335.5" height="24" fill="#818cf8" />
+    <rect x="414.8" y="95" width="4.0" height="24" fill="#34d399" />
+    <rect x="418.8" y="95" width="644.1" height="24" fill="#f59e0b" />
+  </g>
+  <text x="40" y="166" fill="#e2e8f0" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="14" font-weight="600">1. LoRa Radio Airtime (SX1262 SF7)</text>
+  <rect x="365" y="148" width="555" height="26" rx="5" fill="#1e293b" opacity="0.45" />
+  <rect x="365" y="148" width="21.4" height="26" rx="5" fill="#38bdf8" />
+  <text x="398.4" y="166" fill="#f8fafc" font-family="ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace" font-size="13" font-weight="700">61.70 ms (3.8%)</text>
+  <text x="40" y="208" fill="#e2e8f0" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="14" font-weight="600">2. Ollama Embedding (nomic-embed-text)</text>
+  <rect x="365" y="190" width="555" height="26" rx="5" fill="#1e293b" opacity="0.45" />
+  <rect x="365" y="190" width="182.5" height="26" rx="5" fill="#818cf8" />
+  <text x="559.5" y="208" fill="#f8fafc" font-family="ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace" font-size="13" font-weight="700">527.12 ms (32.9%)</text>
+  <text x="40" y="250" fill="#e2e8f0" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="14" font-weight="600">3. Qdrant Vector Search (Docker)</text>
+  <rect x="365" y="232" width="555" height="26" rx="5" fill="#1e293b" opacity="0.45" />
+  <rect x="365" y="232" width="6.0" height="26" rx="5" fill="#34d399" />
+  <text x="383.0" y="250" fill="#f8fafc" font-family="ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace" font-size="13" font-weight="700">1.78 ms (0.1%)</text>
+  <text x="40" y="292" fill="#e2e8f0" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="14" font-weight="600">4. LLM MCP Reasoning (llama3.2:1b)</text>
+  <rect x="365" y="274" width="555" height="26" rx="5" fill="#1e293b" opacity="0.45" />
+  <rect x="365" y="274" width="350.5" height="26" rx="5" fill="#f59e0b" />
+  <text x="727.5" y="292" fill="#f8fafc" font-family="ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace" font-size="13" font-weight="700">1012.04 ms (63.1%)</text>
+  <rect x="40" y="320" width="1020" height="32" rx="6" fill="#1e293b" />
+  <text x="550" y="341" text-anchor="middle" fill="#cbd5e1" font-family="ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace" font-size="13">Host GPU Power: 21.47 W avg  |  Total Energy: 393.81 J  |  Peak Temp: 48 C  |  Qdrant Upsert: 30.26 ms</text>
+</svg>

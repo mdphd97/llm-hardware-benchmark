@@ -15,6 +15,7 @@ from benchmark import (
     parse_ollama_timing,
     sanitize_slug,
 )
+from generate_charts import generate_hero_banner, generate_throughput_chart
 
 
 class TestMultiSystemBenchmark(unittest.TestCase):
@@ -88,6 +89,25 @@ class TestMultiSystemBenchmark(unittest.TestCase):
             self.assertIn("sys_gtx1650", leaderboard)
             self.assertIn("CPU + System RAM (0 GPU layers)", leaderboard)
             self.assertIn("22.5", leaderboard)
+        finally:
+            shutil.rmtree(tmp_dir)
+
+    def test_generate_charts(self):
+        tmp_dir = tempfile.mkdtemp()
+        try:
+            banner_svg = os.path.join(tmp_dir, "banner.svg")
+            generate_hero_banner(banner_svg)
+            self.assertTrue(os.path.exists(banner_svg))
+            with open(banner_svg, "r", encoding="utf-8") as f:
+                self.assertIn("<svg", f.read())
+
+            chart_svg = os.path.join(tmp_dir, "chart.svg")
+            generate_throughput_chart("results", chart_svg)
+            self.assertTrue(os.path.exists(chart_svg))
+            with open(chart_svg, "r", encoding="utf-8") as f:
+                content = f.read()
+                self.assertIn("105.03", content)
+                self.assertIn("21.80", content)
         finally:
             shutil.rmtree(tmp_dir)
 

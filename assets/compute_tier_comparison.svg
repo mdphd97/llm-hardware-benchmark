@@ -1,0 +1,56 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1100 619" width="100%" height="619">
+  <rect width="1100" height="619" rx="14" fill="#0f172a" stroke="#1e293b" stroke-width="1.5" />
+  <text x="40" y="44" fill="#f8fafc" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="22" font-weight="700">Token Generation Throughput Across Compute Tiers (tokens/sec)</text>
+  <text x="40" y="70" fill="#94a3b8" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="14">Higher is better • Zero-temperature greedy decoding (128 tokens) • Single-laptop hardware comparison</text>
+  <rect x="40" y="84" width="14" height="14" rx="3" fill="#38bdf8" />
+  <text x="62" y="95" fill="#cbd5e1" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="12.5">NVIDIA GTX 1650 (4 GB VRAM CUDA / Hybrid)</text>
+  <rect x="360.8" y="84" width="14" height="14" rx="3" fill="#818cf8" />
+  <text x="382.8" y="95" fill="#cbd5e1" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="12.5">Intel i5-11300H CPU + DDR4 RAM (0 GPU layers)</text>
+  <rect x="708.8" y="84" width="14" height="14" rx="3" fill="#34d399" />
+  <text x="730.8" y="95" fill="#cbd5e1" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="12.5">Intel Iris Xe iGPU (Vulkan Unified RAM)</text>
+  <line x1="240.0" y1="125" x2="240.0" y2="569" stroke="#334155" stroke-width="1" stroke-opacity="0.5" stroke-dasharray="4 4" />
+  <text x="240.0" y="591" text-anchor="middle" fill="#64748b" font-family="ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace" font-size="12">0 tok/s</text>
+  <line x1="397.3" y1="125" x2="397.3" y2="569" stroke="#334155" stroke-width="1" stroke-opacity="0.5" stroke-dasharray="4 4" />
+  <text x="397.3" y="591" text-anchor="middle" fill="#64748b" font-family="ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace" font-size="12">25 tok/s</text>
+  <line x1="554.5" y1="125" x2="554.5" y2="569" stroke="#334155" stroke-width="1" stroke-opacity="0.5" stroke-dasharray="4 4" />
+  <text x="554.5" y="591" text-anchor="middle" fill="#64748b" font-family="ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace" font-size="12">50 tok/s</text>
+  <line x1="711.8" y1="125" x2="711.8" y2="569" stroke="#334155" stroke-width="1" stroke-opacity="0.5" stroke-dasharray="4 4" />
+  <text x="711.8" y="591" text-anchor="middle" fill="#64748b" font-family="ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace" font-size="12">75 tok/s</text>
+  <line x1="869.1" y1="125" x2="869.1" y2="569" stroke="#334155" stroke-width="1" stroke-opacity="0.5" stroke-dasharray="4 4" />
+  <text x="869.1" y="591" text-anchor="middle" fill="#64748b" font-family="ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace" font-size="12">100 tok/s</text>
+  <text x="40" y="171" fill="#f1f5f9" font-family="ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace" font-size="16" font-weight="700">llama3.2:1b</text>
+  <text x="40" y="193" fill="#64748b" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="12">Fits in 4 GB VRAM</text>
+  <rect x="240" y="135" width="740" height="28" rx="5" fill="#1e293b" opacity="0.45" />
+  <rect x="240" y="135" width="660.7" height="28" rx="5" fill="#38bdf8" />
+  <text x="910.7" y="154" fill="#f8fafc" font-family="ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace" font-size="13" font-weight="700">105.03 tok/s</text>
+  <rect x="240" y="173" width="740" height="28" rx="5" fill="#1e293b" opacity="0.45" />
+  <rect x="240" y="173" width="137.1" height="28" rx="5" fill="#818cf8" />
+  <text x="387.1" y="192" fill="#f8fafc" font-family="ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace" font-size="13" font-weight="700">21.80 tok/s</text>
+  <rect x="240" y="211" width="740" height="28" rx="5" fill="#1e293b" opacity="0.45" />
+  <rect x="240" y="211" width="43.8" height="28" rx="5" fill="#34d399" />
+  <text x="293.8" y="230" fill="#f8fafc" font-family="ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace" font-size="13" font-weight="700">6.96 tok/s</text>
+  <line x1="40" y1="263" x2="1060" y2="263" stroke="#1e293b" stroke-width="1" />
+  <text x="40" y="319" fill="#f1f5f9" font-family="ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace" font-size="16" font-weight="700">llama3.2:3b</text>
+  <text x="40" y="341" fill="#64748b" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="12">Fits in 4 GB VRAM</text>
+  <rect x="240" y="283" width="740" height="28" rx="5" fill="#1e293b" opacity="0.45" />
+  <rect x="240" y="283" width="397.1" height="28" rx="5" fill="#38bdf8" />
+  <text x="647.1" y="302" fill="#f8fafc" font-family="ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace" font-size="13" font-weight="700">63.13 tok/s</text>
+  <rect x="240" y="321" width="740" height="28" rx="5" fill="#1e293b" opacity="0.45" />
+  <rect x="240" y="321" width="107.1" height="28" rx="5" fill="#818cf8" />
+  <text x="357.1" y="340" fill="#f8fafc" font-family="ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace" font-size="13" font-weight="700">17.02 tok/s</text>
+  <rect x="240" y="359" width="740" height="28" rx="5" fill="#1e293b" opacity="0.45" />
+  <rect x="240" y="359" width="32.3" height="28" rx="5" fill="#34d399" />
+  <text x="282.3" y="378" fill="#f8fafc" font-family="ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace" font-size="13" font-weight="700">5.14 tok/s</text>
+  <line x1="40" y1="411" x2="1060" y2="411" stroke="#1e293b" stroke-width="1" />
+  <text x="40" y="467" fill="#f1f5f9" font-family="ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace" font-size="16" font-weight="700">llama3.1:8b</text>
+  <text x="40" y="489" fill="#64748b" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="12">Exceeds 4 GB VRAM (Hybrid)</text>
+  <rect x="240" y="431" width="740" height="28" rx="5" fill="#1e293b" opacity="0.45" />
+  <rect x="240" y="431" width="51.5" height="28" rx="5" fill="#38bdf8" />
+  <text x="301.5" y="450" fill="#f8fafc" font-family="ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace" font-size="13" font-weight="700">8.18 tok/s</text>
+  <rect x="240" y="469" width="740" height="28" rx="5" fill="#1e293b" opacity="0.45" />
+  <rect x="240" y="469" width="39.6" height="28" rx="5" fill="#818cf8" />
+  <text x="289.6" y="488" fill="#f8fafc" font-family="ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace" font-size="13" font-weight="700">6.29 tok/s</text>
+  <rect x="240" y="507" width="740" height="28" rx="5" fill="#1e293b" opacity="0.45" />
+  <rect x="240" y="507" width="21.0" height="28" rx="5" fill="#34d399" />
+  <text x="271.0" y="526" fill="#f8fafc" font-family="ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace" font-size="13" font-weight="700">3.34 tok/s</text>
+</svg>
