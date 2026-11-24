@@ -1,15 +1,17 @@
 #!/usr/bin/env python3
 """
-Hardware-Aware LLM Inference Benchmark
-Standardized evaluation script for measuring Time-To-First-Token (TTFT)
-and generation throughput using local Ollama endpoints.
+Multi-System Hardware-Aware LLM Inference Benchmark
+Evaluates and aggregates Large Language Model (LLM) inference performance
+across multiple computers, GPU architectures, and memory topologies.
 """
 
 import argparse
 import datetime
+import glob
 import json
 import os
 import platform
+import re
 import subprocess
 import time
 import urllib.error
@@ -17,8 +19,21 @@ import urllib.request
 from typing import Any, Dict, List, Optional, Tuple
 
 
+def sanitize_slug(text: str) -> str:
+    """Convert hardware names into clean directory-safe identifiers."""
+    cleaned = re.sub(r"[^\w\s-]", "", text).strip().lower()
+    return re.sub(r"[-\s]+", "_", cleaned)
+
+
 def get_cpu_info() -> str:
-    """Extract clean CPU model string on Linux, fallback to platform."""
+    """Extract clean CPU model string across Linux and macOS."""
+    if platform.system() == "Darwin":
+        try:
+            return subprocess.check_output(
+                ["sysctl", "-n", "machdep.cpu.brand_string"], text=True
+            ).strip()
+        except Exception:
+            return "Apple Silicon / Mac CPU"
     try:
         with open("/proc/cpuinfo", "r", encoding="utf-8") as f:
             for line in f:
@@ -30,7 +45,15 @@ def get_cpu_info() -> str:
 
 
 def get_ram_info() -> str:
-    """Extract total system RAM in GiB."""
+    """Extract total system RAM across Linux and macOS."""
+    if platform.system() == "Darwin":
+        try:
+            bytes_mem = int(
+                subprocess.check_output(["sysctl", "-n", "hw.memsize"], text=True).strip()
+            )
+            return f"{bytes_mem / (1024**3):.1f} GiB"
+        except Exception:
+            pass
     try:
         with open("/proc/meminfo", "r", encoding="utf-8") as f:
             for line in f:
@@ -43,13 +66,18 @@ def get_ram_info() -> str:
 
 
 def get_gpu_info() -> Dict[str, str]:
-    """Extract NVIDIA GPU details via nvidia-smi if available."""
+    """Extract GPU details (NVIDIA nvidia-smi or macOS Metal)."""
     info = {
-        "model": "No dedicated NVIDIA GPU detected",
-        "vram": "N/A",
+        "model": "CPU / Integrated Graphics",
+        "vram": "Shared System RAM",
         "driver": "N/A",
         "cuda": "N/A",
     }
+    if platform.system() == "Darwin":
+        info["model"] = "Apple Silicon GPU (Metal)"
+        info["vram"] = "Unified Memory"
+        return info
+
     try:
         out = subprocess.check_output(
             [
@@ -61,7 +89,7 @@ def get_gpu_info() -> Dict[str, str]:
             stderr=subprocess.DEVNULL,
         ).strip()
         if out:
-            parts = [p.strip() for p in out.split(",")]
+            parts = [p.strip() for p in out.splitlines()[0].split(",")]
             if len(parts) >= 3:
                 info["model"] = parts[0]
                 info["vram"] = f"{int(parts[1]) / 1024:.1f} GiB ({parts[1]} MiB)"
@@ -72,20 +100,35 @@ def get_gpu_info() -> Dict[str, str]:
         )
         for line in cuda_out.splitlines():
             if "CUDA Version:" in line:
-                info["cuda"] = line.split("CUDA Version:")[1].split()[0].replace("|", "").strip()
+                info["cuda"] = (
+                    line.split("CUDA Version:")[1].split()[0].replace("|", "").strip()
+                )
                 break
     except Exception:
         pass
     return info
 
 
-def detect_system_profile() -> Dict[str, Any]:
-    """Collate complete host hardware and OS profile."""
+def detect_system_profile(custom_name: Optional[str] = None) -> Dict[str, Any]:
+    """Collate complete host hardware, OS, and slug identifier."""
     gpu = get_gpu_info()
+    cpu = get_cpu_info()
+    ram = get_ram_info()
+    os_desc = platform.platform()
+
+    if custom_name:
+        slug = sanitize_slug(custom_name)
+    else:
+        # Build concise identifier: e.g. gtx_1650-i5_11300h
+        gpu_short = gpu["model"].replace("NVIDIA GeForce ", "").replace("NVIDIA ", "")
+        cpu_short = cpu.replace("Intel(R) Core(TM) ", "").replace("11th Gen ", "")
+        slug = sanitize_slug(f"{gpu_short}_{cpu_short}")
+
     return {
-        "os": platform.platform(),
-        "cpu": get_cpu_info(),
-        "ram": get_ram_info(),
+        "system_id": slug,
+        "os": os_desc,
+        "cpu": cpu,
+        "ram": ram,
         "gpu_model": gpu["model"],
         "gpu_vram": gpu["vram"],
         "gpu_driver": gpu["driver"],
@@ -95,10 +138,7 @@ def detect_system_profile() -> Dict[str, Any]:
 
 
 def parse_ollama_timing(data: Dict[str, Any]) -> Dict[str, float]:
-    """
-    Extract prompt processing and token evaluation speed from Ollama response.
-    Timestamps in Ollama are given in nanoseconds (1 second = 1e9 ns).
-    """
+    """Extract prompt processing and token evaluation speed from Ollama response."""
     prompt_count = data.get("prompt_eval_count", 0)
     prompt_ns = data.get("prompt_eval_duration", 0)
     eval_count = data.get("eval_count", 0)
@@ -128,7 +168,7 @@ def send_ollama_request(
         "stream": False,
         "options": {
             "num_predict": num_predict,
-            "temperature": 0.0,  # Deterministic / zero-temperature for scientific consistency
+            "temperature": 0.0,
         },
     }).encode("utf-8")
 
@@ -137,8 +177,21 @@ def send_ollama_request(
         data=payload,
         headers={"Content-Type": "application/json"},
     )
-    with urllib.request.urlopen(req, timeout=180) as resp:
+    with urllib.request.urlopen(req, timeout=300) as resp:
         return json.loads(resp.read().decode("utf-8"))
+
+
+def pull_ollama_model(model: str) -> bool:
+    """Pull model using Ollama CLI if missing."""
+    print(f"[*] Pulling '{model}' via Ollama...")
+    ret = subprocess.call(["ollama", "pull", model])
+    return ret == 0
+
+
+def delete_ollama_model(model: str) -> None:
+    """Delete model from local Ollama storage to reclaim disk space."""
+    print(f"[*] Removing '{model}' from Ollama storage...")
+    subprocess.call(["ollama", "rm", model], stdout=subprocess.DEVNULL)
 
 
 def run_benchmark_for_model(
@@ -185,22 +238,18 @@ def run_benchmark_for_model(
     }
 
 
-def format_markdown_report(profile: Dict[str, Any], results: List[Dict[str, Any]]) -> str:
-    """Format benchmark results into a clean GitHub markdown document."""
+def format_system_markdown_table(profile: Dict[str, Any], results: List[Dict[str, Any]]) -> str:
+    """Generate Markdown report for a specific hardware system."""
     lines = [
-        "## System Hardware Profile",
+        f"### System: `{profile.get('system_id', 'Unknown')}`",
         "",
         f"- **Processor (CPU):** {profile.get('cpu', 'N/A')}",
         f"- **System Memory (RAM):** {profile.get('ram', 'N/A')}",
-        f"- **Dedicated Graphics (GPU):** {profile.get('gpu_model', 'N/A')}",
-        f"- **Video Memory (VRAM):** {profile.get('gpu_vram', 'N/A')}",
-        f"- **GPU Driver & CUDA:** Driver {profile.get('gpu_driver', 'N/A')} | CUDA {profile.get('cuda_version', 'N/A')}",
-        f"- **Operating System:** {profile.get('os', 'N/A')}",
+        f"- **Graphics (GPU):** {profile.get('gpu_model', 'N/A')} ({profile.get('gpu_vram', 'N/A')})",
+        f"- **OS:** {profile.get('os', 'N/A')}",
         f"- **Benchmark Date:** {profile.get('timestamp', 'N/A')}",
         "",
-        "## Inference Performance Results",
-        "",
-        "| Model Name | Prompt Processing (tok/s) | Generation Speed (tok/s) | Samples | Evaluation Mode |",
+        "| Model Name | Prompt Processing (tok/s) | Generation Speed (tok/s) | Runs | Execution Mode |",
         "| :--- | :---: | :---: | :---: | :--- |",
     ]
 
@@ -209,29 +258,70 @@ def format_markdown_report(profile: Dict[str, Any], results: List[Dict[str, Any]
         p_spd = item["avg_prompt_speed_tok_s"]
         e_spd = item["avg_eval_speed_tok_s"]
         runs = item["runs"]
-        
-        # Categorize execution mode based on model naming / parameters
-        if any(tag in m for tag in ["1b", "0.5b", "1.5b"]):
-            mode = "Full GPU VRAM Offload"
-        elif any(tag in m for tag in ["3b", "mini"]):
-            mode = "Full GPU VRAM Offload"
+
+        if any(tag in m for tag in ["1b", "0.5b", "1.5b", "3b", "mini"]):
+            mode = "Full VRAM Offload"
         elif any(tag in m for tag in ["7b", "8b"]):
-            mode = "Hybrid Offload (GPU VRAM + System RAM)"
+            mode = "Hybrid Offload (VRAM + System RAM)"
         else:
             mode = "System RAM / CPU Bound"
 
         lines.append(f"| `{m}` | **{p_spd}** | **{e_spd}** | {runs} | {mode} |")
 
     lines.append("")
-    lines.append("> [!NOTE]")
-    lines.append("> Prompt processing measures time-to-first-token throughput (input comprehension).")
-    lines.append("> Generation speed measures sustained token output rate during active text synthesis.")
+    return "\n".join(lines)
+
+
+def aggregate_all_systems(results_root: str = "results") -> str:
+    """
+    Search results directory for all systems and generate a multi-system
+    comparative cross-hardware leaderboard.
+    """
+    pattern = os.path.join(results_root, "*", "benchmark_results.json")
+    files = sorted(glob.glob(pattern))
+    if not files:
+        return "No benchmark results found across systems."
+
+    lines = [
+        "# Cross-System Hardware Leaderboard",
+        "",
+        "Comparative Large Language Model inference throughput across tested systems.",
+        "",
+        "| System ID | GPU / Compute | CPU & RAM | Model | Prompt (tok/s) | Generation (tok/s) |",
+        "| :--- | :--- | :--- | :--- | :---: | :---: |",
+    ]
+
+    for fpath in files:
+        try:
+            with open(fpath, "r", encoding="utf-8") as f:
+                data = json.load(f)
+            prof = data.get("system_profile", {})
+            benchmarks = data.get("benchmark_results", [])
+
+            sys_id = prof.get("system_id", "Unknown")
+            gpu = prof.get("gpu_model", "N/A").replace("NVIDIA GeForce ", "")
+            vram = prof.get("gpu_vram", "")
+            gpu_desc = f"{gpu} ({vram})" if vram and vram != "N/A" else gpu
+            cpu_ram = f"{prof.get('cpu', 'N/A')} ({prof.get('ram', 'N/A')})"
+
+            for b in benchmarks:
+                m = b.get("model", "N/A")
+                p = b.get("avg_prompt_speed_tok_s", 0.0)
+                e = b.get("avg_eval_speed_tok_s", 0.0)
+                lines.append(f"| `{sys_id}` | {gpu_desc} | {cpu_ram} | `{m}` | **{p}** | **{e}** |")
+        except Exception:
+            continue
+
+    lines.append("")
+    lines.append("> To test a new system and add it to this leaderboard, see replication instructions below.")
     lines.append("")
     return "\n".join(lines)
 
 
 def parse_args():
-    parser = argparse.ArgumentParser(description="Reproducible LLM Inference Benchmark Tool")
+    parser = argparse.ArgumentParser(
+        description="Multi-System LLM Inference Benchmark & Aggregation Suite"
+    )
     parser.add_argument(
         "--endpoint",
         default=os.getenv("OLLAMA_HOST", "http://localhost:11434"),
@@ -240,8 +330,13 @@ def parse_args():
     parser.add_argument(
         "--models",
         nargs="+",
-        default=["llama3.2:1b", "llama3.2:3b", "llama3.1:8b"],
+        default=["llama3.2:1b", "llama3.2:3b"],
         help="List of Ollama models to benchmark",
+    )
+    parser.add_argument(
+        "--system-name",
+        default=None,
+        help="Custom system name / slug (e.g. 'm2-macbook-pro' or 'rtx-3060-desktop')",
     )
     parser.add_argument(
         "--runs",
@@ -256,26 +351,47 @@ def parse_args():
         help="Target number of output tokens generated per pass (default: 128)",
     )
     parser.add_argument(
-        "--output-json",
-        default="results/benchmark_results.json",
-        help="Path to save raw JSON output",
+        "--delete-after",
+        action="store_true",
+        help="Automatically remove downloaded models from Ollama after benchmarking to save disk space",
     )
     parser.add_argument(
-        "--output-md",
-        default="results/benchmark_table.md",
-        help="Path to save generated Markdown report",
+        "--results-dir",
+        default="results",
+        help="Root directory for multi-system results storage",
+    )
+    parser.add_argument(
+        "--aggregate-only",
+        action="store_true",
+        help="Skip benchmark execution and regenerate cross-system comparison table only",
     )
     return parser.parse_args()
 
 
 def main():
     args = parse_args()
-    profile = detect_system_profile()
-    print("Detected System Profile:")
+
+    if args.aggregate_only:
+        table = aggregate_all_systems(args.results_dir)
+        leaderboard_path = os.path.join(args.results_dir, "LEADERBOARD.md")
+        with open(leaderboard_path, "w", encoding="utf-8") as f:
+            f.write(table)
+        print(f"[✓] Updated leaderboard at {leaderboard_path}")
+        print("\n" + table)
+        return
+
+    profile = detect_system_profile(args.system_name)
+    sys_slug = profile["system_id"]
+    sys_dir = os.path.join(args.results_dir, sys_slug)
+    os.makedirs(sys_dir, exist_ok=True)
+
+    print("==================================================")
+    print(f"Active System Identifier: {sys_slug}")
     print(f"  CPU: {profile['cpu']}")
     print(f"  RAM: {profile['ram']}")
     print(f"  GPU: {profile['gpu_model']} ({profile['gpu_vram']})")
     print(f"  OS:  {profile['os']}")
+    print("==================================================")
 
     standard_prompt = (
         "Explain the physical principles of how an airplane wing generates lift, "
@@ -283,8 +399,17 @@ def main():
     )
 
     results = []
+    models_to_clean = []
+
     for model in args.models:
         try:
+            # Check if model needs to be pulled
+            try:
+                send_ollama_request(args.endpoint, model, "ping", num_predict=1)
+            except Exception:
+                pull_ollama_model(model)
+                models_to_clean.append(model)
+
             res = run_benchmark_for_model(
                 args.endpoint,
                 model,
@@ -296,20 +421,35 @@ def main():
         except Exception as e:
             print(f"[!] Error benchmarking {model}: {e}")
 
+    # Delete models if requested
+    if args.delete_after:
+        for model in set(args.models + models_to_clean):
+            delete_ollama_model(model)
+
     if results:
-        os.makedirs(os.path.dirname(args.output_json) or ".", exist_ok=True)
+        # Save per-system output
+        json_path = os.path.join(sys_dir, "benchmark_results.json")
         full_payload = {
             "system_profile": profile,
             "benchmark_results": results,
         }
-        with open(args.output_json, "w", encoding="utf-8") as f:
+        with open(json_path, "w", encoding="utf-8") as f:
             json.dump(full_payload, f, indent=2)
-        print(f"\n[✓] Saved raw data to {args.output_json}")
 
-        md_content = format_markdown_report(profile, results)
-        with open(args.output_md, "w", encoding="utf-8") as f:
+        md_content = format_system_markdown_table(profile, results)
+        md_path = os.path.join(sys_dir, "summary.md")
+        with open(md_path, "w", encoding="utf-8") as f:
             f.write(md_content)
-        print(f"[✓] Saved markdown report to {args.output_md}")
+
+        print(f"\n[✓] Saved system data to {json_path}")
+        print(f"[✓] Saved system summary to {md_path}")
+
+        # Regenerate global comparative leaderboard
+        leaderboard_content = aggregate_all_systems(args.results_dir)
+        leaderboard_path = os.path.join(args.results_dir, "LEADERBOARD.md")
+        with open(leaderboard_path, "w", encoding="utf-8") as f:
+            f.write(leaderboard_content)
+        print(f"[✓] Updated comparative leaderboard at {leaderboard_path}")
         print("\n" + md_content)
 
 

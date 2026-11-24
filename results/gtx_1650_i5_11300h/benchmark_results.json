@@ -7,7 +7,8 @@
     "gpu_vram": "4.0 GiB (4096 MiB)",
     "gpu_driver": "595.99.02",
     "cuda_version": "13.2",
-    "timestamp": "2026-11-24T18:17:30.714286+00:00"
+    "timestamp": "2026-11-24T18:17:30.714286+00:00",
+    "system_id": "gtx_1650_i5_11300h"
   },
   "benchmark_results": [
     {
